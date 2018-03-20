@@ -1,0 +1,34 @@
+{
+  "env":{
+    "phantomjs":true,
+  }
+  ,"globals":{
+    "casper":true,
+  }
+  ,"rules":{
+    "no-plusplus": 0,
+    "no-console": 0,
+    "no-param-reassign": 0,
+    "global-require": 0,
+    "no-underscore-dangle": "off",
+    "vars-on-top": "off",
+    "import/no-extraneous-dependencies": ["error", {
+      "devDependencies": false
+    }],
+  } 
+  ,plugins: [
+    "eslint-plugin-import"
+  ]
+  ,overrides: [{
+    files: "test/**/*",
+    rules: {
+      "import/no-extraneous-dependencies": ["error", {
+        "devDependencies": true
+      }],
+      "func-names": "off",
+      "no-unused-expressions": "off",
+      "no-global-assign": "off"
+    }
+  }]
+  ,"extends":["airbnb-base/legacy"]
+}

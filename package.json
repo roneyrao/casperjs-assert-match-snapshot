@@ -1,0 +1,38 @@
+{
+  "name": "casperjs-assert-match-snapshot",
+  "version": "1.0.0",
+  "description": "casperjs tester extension to assert snapshots matched",
+  "scripts": {
+    "pretest": "eslint",
+    "test:e2e": "node test/e2e.js",
+    "test": "npm run test:unit && npm run test:e2e"
+  },
+  "files": [
+    "index.js"
+  ],
+  "keywords": [
+    "casper",
+    "casperjs",
+    "phantomjs",
+    "slimerjs",
+    "assert",
+    "tester",
+    "snapshot",
+    "match"
+  ],
+  "author": "Roney Rao",
+  "license": "MIT",
+  "repository": "https://github.com/roneyrao/casperjs-assert-match-snapshot",
+  "peerDependencies": {
+    "casperjs": "^1.1.4"
+  },
+  "dependencies": {
+    "resemblejs": "^2.10.0"
+  },
+  "devDependencies": {
+    "casperjs": "^1.1.4",
+    "eslint": "^4.19.0",
+    "eslint-config-airbnb-base": "^12.1.0",
+    "eslint-plugin-import": "^2.9.0"
+  }
+}
