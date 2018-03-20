@@ -2,20 +2,24 @@ var fs = require('fs');
 var tester = require('tester');
 var resemble = require('resemblejs');
 var optionsHelper = require('./options-helper');
+var MatchSnapshotOptionsError = require('./option-error.js');
 
 function check(filename, selector, options, cb) {
   if (filename === undefined) {
-    throw new optionsHelper.MatchSnapshotOptionsError('You should passed in a string to specify where snapshots reside.');
+    throw new MatchSnapshotOptionsError('You should passed in a string to specify where snapshots reside.');
   }
+  filename += '.' + options.format;
+  var filePathNormal = options.folder + filename;
+  var capture = casper[selector === 'string' ? 'captureSelector' : 'capture'];
 
-  var filePathNormal = options.folder + filename + options.extension;
   if (casper.cli.options.updateSnapshot) {
-    casper[selector ? 'captureSelector' : 'capture'](filePathNormal, selector);
+    // only specify format at the file name.
+    capture(filePathNormal, selector, { quality: options.quality });
     cb(null, { rawMisMatchPercentage: 0 });
   } else {
-    var filePathTemp = options.folder + 'temp_' + filename + options.extension;
+    var filePathTemp = options.folder + 'temp_' + filename;
 
-    casper[selector ? 'captureSelector' : 'capture'](filePathTemp, selector);
+    capture(filePathTemp, selector, { quality: options.quality });
 
     resemble.compare('file:///' + filePathTemp, 'file:///' + filePathNormal, function compareCB(err, data) {
       try {

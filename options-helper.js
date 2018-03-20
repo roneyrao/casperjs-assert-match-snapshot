@@ -1,90 +1,105 @@
 'use strict';
 
 var fs = require('fs');
+var MatchSnapshotOptionsError = require('./option-error.js');
 
-
-var builtinOptions = {
-  folder: '/__snapshots__/',
-  maxDiff: 0,
-  extension: '.png',
-  keepTemp: false
-};
-
+var builtinOptions = {};
 var defaultOptions;
-
-function MatchSnapshotOptionsError(msg) {
-  Error.call(this);
-  this.message = msg;
-  this.name = 'MatchSnapshotOptionsError';
-}
-MatchSnapshotOptionsError.prototype = new Error();
 
 function validateFolder(dir) {
   if (typeof dir !== 'string') {
     throw new MatchSnapshotOptionsError('You should passed in a string to specify where snapshots reside.');
-  } else {
-    if (dir[0] !== '/') {
-      dir = '/' + dir;
-    }
-    return fs.workingDirectory + dir;
   }
+  if (dir[0] !== '/') {
+    dir = '/' + dir;
+  }
+  return fs.workingDirectory + dir;
+}
+function validateFormat(format) {
+  if (typeof format !== 'string') {
+    throw new MatchSnapshotOptionsError('"format" only accepts string to specify the image file format.');
+  }
+  if (!(/^\w+$/.test(format))) {
+    throw new MatchSnapshotOptionsError('"format" string is invalid.');
+  }
+  return format;
+}
+function validateKeep(keepTemp) {
+  if (typeof format !== 'boolean') {
+    throw new MatchSnapshotOptionsError('"keepTemp" only accepts boolean to specify whether to persist the temporary snapshot image being tested against.');
+  }
+  return !!keepTemp;
 }
 function validateDiff(diff) {
   if (typeof diff !== 'number') {
     throw new MatchSnapshotOptionsError('"maxDiff" only accepts number to specify the max difference allowed.');
   } else if (diff < 0 || diff > 1) {
     throw new MatchSnapshotOptionsError('"maxDiff" only accepts number between 0 and 100.');
-  } else {
-    return diff;
   }
+  return diff;
 }
 
-function validateExtension(ext) {
-  if (typeof ext !== 'string') {
-    throw new MatchSnapshotOptionsError('"extension" only accepts string to specify the image file extension.');
-  } else {
-    if (ext[0] !== '.') {
-      ext = '.' + ext;
-    }
-    return ext;
+function validateQuality(quality) {
+  if (typeof quality !== 'number') {
+    throw new MatchSnapshotOptionsError('"quality" only accepts number to specify the quality of image.');
+  } else if (quality < 0 || quality > 1) {
+    throw new MatchSnapshotOptionsError('"quality" only accepts number between 0 and 100.');
   }
+  return quality;
 }
+
+
+function createValidator(key, validate) {
+  return function ValidateWrapper(value) {
+    if (value === undefined) return defaultOptions[key];
+    return validate(value);
+  };
+}
+
+var builtinOptionsMap = [
+  ['folder', '/__snapshots__/', validateFolder],
+  ['format', 'png', validateFormat],
+  ['keepTemp', false, validateKeep],
+  ['maxDiff', 0, validateDiff],
+  ['quality', 75, validateQuality]
+];
+
+var optionsKeys = [];
+
+(function initBuiltinOptions() {
+  for (var i = 0, len = builtinOptionsMap.length; i < len; i++) {
+    var item = builtinOptionsMap[i];
+    var key = item[0];
+    optionsKeys.push(key);
+    builtinOptions[key] = {
+      value: item[1]
+    };
+    var validator = item[2];
+    if (validator) {
+      builtinOptions[key].validator = createValidator(key, validator);
+    }
+  }
+}());
 
 function validateOptions(options) {
-  options.folder = options.folder !== undefined
-    ?
-    validateFolder(options.folder)
-    :
-    defaultOptions.folder;
+  if (!options) return defaultOptions;
 
-  options.maxDiff = options.maxDiff !== undefined
-    ?
-    validateDiff(options.maxDiff)
-    :
-    defaultOptions.maxDiff;
+  var newOpts = {};
 
-  options.extension = options.extension !== undefined
-    ?
-    validateExtension(options.extension)
-    :
-    defaultOptions.extension;
-
-  options.keepTemp = options.keepTemp !== undefined
-    ?
-    !!options.keepTemp
-    :
-    defaultOptions.keepTemp;
+  for (var i = 0, len = optionsKeys.length; i < len; i++) {
+    var key = optionsKeys[i];
+    newOpts[key] = builtinOptions[key].validator(options.key);
+  }
+  return newOpts;
 }
 
 exports.initDefaultOptions = function initDefaultOptions(options) {
   defaultOptions = {};
-  var keys = Object.getOwnPropertyNames(builtinOptions);
-  for (var i = 0, len = keys.length; i < len; i++) {
-    defaultOptions[i] = builtinOptions[keys[i]];
+  for (var i = 0, len = optionsKeys.length; i < len; i++) {
+    defaultOptions[i] = builtinOptions[optionsKeys[i]].value;
   }
   defaultOptions.folder = fs.workingDirectory + defaultOptions.folder;
 
   return validateOptions(options);
 };
 exports.validateOptions = validateOptions;
-exports.MatchSnapshotOptionsError = MatchSnapshotOptionsError;
