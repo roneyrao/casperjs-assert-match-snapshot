@@ -1,3 +1,5 @@
+'use strict';
+
 var fs = require('fs');
 var tester = require('tester');
 var resemble = require('resemblejs');
