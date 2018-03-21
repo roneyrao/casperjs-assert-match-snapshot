@@ -1,7 +1,7 @@
 'use strict';
 
 var fs = require('fs');
-var tester = require('tester');
+var tester = global.require('tester');
 var resemble = require('resemblejs');
 var optionsHelper = require('./options-helper');
 var MatchSnapshotOptionsError = require('./option-error.js');
