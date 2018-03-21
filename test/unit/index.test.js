@@ -15,7 +15,6 @@ describe('index', function () {
     compare: sinon.spy()
   };
   var optionsHelper = {
-    validateOptions: sinon.spy(),
     initDefaultOptions: sinon.spy()
   };
   var init;
@@ -173,5 +172,66 @@ describe('index', function () {
     it('bound to casper.test', function () {
       expect(typeof assertMatchSnapshot).equal('function');
     });
+    it('fail', function () {
+      var check = sinon.spy();
+      var revert = init.__set__('check', check);
+      var filename = 'aaaa';
+      var selector = 'afaf';
+      var opts = {};
+      var waitMatch;
+      var prom = {
+        then: function (_waitMatch) { waitMatch = _waitMatch; }
+      };
+      optionsHelper.validateOptions = sinon.stub().returnsArg(0);
+      casper.waitFor = sinon.stub().returns(prom);
+
+      assertMatchSnapshot(filename, selector, opts);
+
+      sinon.assert.calledWithExactly(check, filename, selector, opts, sinon.match.func);
+      revert();
+
+      var checkCB = check.getCall(0).args[3];
+      var err = new Error('afawf');
+      checkCB(err);
+      var waitForCB = casper.waitFor.getCall(0).args[0];
+      delete casper.waitFor;
+      expect(waitForCB()).equal(true);
+
+      casper.test.fail = sinon.spy();
+      waitMatch();
+      sinon.assert.calledWithExactly(casper.test.fail, err);
+      delete casper.test.fail;
+    });
+
+
+    function createSucceedTest(raw, match) {
+      return function () {
+        var check = sinon.spy();
+        var revert = init.__set__('check', check);
+        var waitMatch;
+        var prom = {
+          then: function (_waitMatch) { waitMatch = _waitMatch; }
+        };
+        optionsHelper.validateOptions = sinon.stub().returns({ maxDiff: 5 });
+        casper.waitFor = sinon.stub().returns(prom);
+
+        assertMatchSnapshot();
+        revert();
+
+        var checkCB = check.getCall(0).args[3];
+        checkCB(null, { rawMisMatchPercentage: raw });
+        var waitForCB = casper.waitFor.getCall(0).args[0];
+        delete casper.waitFor;
+        expect(waitForCB()).equal(true);
+
+        casper.test.assertEqual = sinon.spy();
+        waitMatch();
+        sinon.assert.calledWithExactly(casper.test.assertEqual, match, true);
+        delete casper.test.assertEqual;
+      };
+    }
+
+    it('succeed, break critera', createSucceedTest(6, false));
+    it('succeed, satisfy critera', createSucceedTest(4, true));
   });
 });

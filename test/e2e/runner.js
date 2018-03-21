@@ -1,11 +1,14 @@
 var execFile = require('child_process').execFile;
 
-var child;
+process.chdir('test/e2e');
+
+var execPath;
 if (process.platform === 'win32') {
-  child = execFile('node_modules\\.bin\\casperjs.cmd', ['test', 'test/suite.js']);
+  execPath = '..\\..\\node_modules\\.bin\\casperjs.cmd';
 } else {
-  child = execFile('node_modules/.bin/casperjs', ['test', 'test/suite.js']);
+  execPath = '../../node_modules/.bin/casperjs';
 }
+var child = execFile(execPath, ['test', 'set-default-options.suite.js']);
 
 child.stdout.on('data', function (data) {
   console.log(data);

@@ -13,9 +13,9 @@ function check(filename, selector, options, cb) {
   var capture;
   var selectorType = typeof selector;
   if (selectorType === 'string') {
-    capture = casper.captureSelector;
+    capture = casper.captureSelector.bind(casper);
   } else if (selectorType === 'object' || selector == undefined) { // eslint-disable-line eqeqeq
-    capture = casper.capture;
+    capture = casper.capture.bind(casper);
   } else {
     throw new MatchSnapshotOptionsError('Selector should be string or object or undefined');
   }
@@ -36,17 +36,13 @@ function check(filename, selector, options, cb) {
         if (!options.keepTemp) {
           fs.remove(filePathTemp);
         }
-        if (err) { // this error has no information.
-          cb(new tester.AssertionError('Fail to compare snapshot'));
-        } else {
-          cb(null, data);
-        }
       } catch (err2) {
-        var msg = 'Fail to remove temporary snapshot, ' + err2.message;
-        if (err) {
-          msg += '. Also Failed to compare.';
-        }
-        cb(new tester.AssertionError(msg));
+        console.warn('warning: Fail to remove temporary snapshot, ' + err2.message);
+      }
+      if (err) { // this error has no information.
+        cb(new tester.AssertionError('Fail to compare snapshot'));
+      } else {
+        cb(null, data);
       }
     });
   }
@@ -62,8 +58,8 @@ casper.test.assertMatchSnapshot = function matchSnapshot(filename, selector, opt
       console.log('Compare error occured');
       error = err;
     } else {
-      console.log('Expect mismatch percentage: ', data.rawMisMatchPercentage, ' < ', options.maxDiff);
-      match = data.rawMisMatchPercentage < options.maxDiff;
+      console.log('Expect mismatch percentage: ', data.rawMisMatchPercentage, ' <= ', options.maxDiff);
+      match = data.rawMisMatchPercentage <= options.maxDiff;
     }
   }
   check(filename, selector, options, cb);
@@ -76,6 +72,7 @@ casper.test.assertMatchSnapshot = function matchSnapshot(filename, selector, opt
     if (error) {
       casper.test.fail(error);
     } else {
+      console.log('match', match, true);
       casper.test.assertEqual(match, true);
     }
   });

@@ -96,7 +96,7 @@ function validateOptions(options) {
   return newOpts;
 }
 
-exports.initDefaultOptions = function initDefaultOptions(options) {
+function initDefaultOptions(options) {
   defaultOptions = {};
   for (var i = 0, len = optionsKeys.length; i < len; i++) {
     var k = optionsKeys[i];
@@ -105,5 +105,10 @@ exports.initDefaultOptions = function initDefaultOptions(options) {
   defaultOptions.folder = fs.workingDirectory + defaultOptions.folder;
 
   defaultOptions = validateOptions(options);
-};
+}
+
+exports.initDefaultOptions = initDefaultOptions;
 exports.validateOptions = validateOptions;
+
+// init default options.
+initDefaultOptions();

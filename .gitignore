@@ -1,0 +1,5 @@
+/.nyc_output
+/coverage
+/test/e2e/snapshots
+/test/e2e/__snapshots__
+

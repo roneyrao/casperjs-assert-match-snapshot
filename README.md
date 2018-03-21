@@ -6,6 +6,9 @@
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/roneyrao/casperjs-assert-match-snapshot/master/LICENSE)
 
 
+## Caveat
+- It calls `waitFor` internally, so if the next steps depends on that test, please execute in `then`.
+
 ## License
 
 [MIT](LICENSE).

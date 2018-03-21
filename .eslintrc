@@ -3,7 +3,7 @@
     "phantomjs":true,
   }
   ,"globals":{
-    "casper":true,
+    "casper":true
   }
   ,"rules":{
     "no-plusplus": 0,
