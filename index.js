@@ -4,15 +4,23 @@ var fs = require('fs');
 var tester = global.require('tester');
 var resemble = require('resemblejs');
 var optionsHelper = require('./options-helper');
-var MatchSnapshotOptionsError = require('./option-error.js');
+var MatchSnapshotOptionsError = require('./option-error.js').MatchSnapshotOptionsError;
 
 function check(filename, selector, options, cb) {
   if (filename === undefined) {
-    throw new MatchSnapshotOptionsError('You should passed in a string to specify where snapshots reside.');
+    throw new MatchSnapshotOptionsError('Snapshot filename should be a string');
+  }
+  var capture;
+  var selectorType = typeof selector;
+  if (selectorType === 'string') {
+    capture = casper.captureSelector;
+  } else if (selectorType === 'object' || selector == undefined) { // eslint-disable-line eqeqeq
+    capture = casper.capture;
+  } else {
+    throw new MatchSnapshotOptionsError('Selector should be string or object or undefined');
   }
   filename += '.' + options.format;
   var filePathNormal = options.folder + filename;
-  var capture = casper[selector === 'string' ? 'captureSelector' : 'capture'];
 
   if (casper.cli.options.updateSnapshot) {
     // only specify format at the file name.
@@ -28,17 +36,17 @@ function check(filename, selector, options, cb) {
         if (!options.keepTemp) {
           fs.remove(filePathTemp);
         }
-        if (err) {
+        if (err) { // this error has no information.
           cb(new tester.AssertionError('Fail to compare snapshot'));
         } else {
           cb(null, data);
         }
       } catch (err2) {
+        var msg = 'Fail to remove temporary snapshot, ' + err2.message;
         if (err) {
-          cb(new tester.AssertionError('Fail to compare snapshot' + err.message));
-        } else {
-          cb(err2);
+          msg += '. Also Failed to compare.';
         }
+        cb(new tester.AssertionError(msg));
       }
     });
   }

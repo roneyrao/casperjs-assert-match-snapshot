@@ -1,4 +1,3 @@
-console.log('aaaaaaaaaaa')
 require('../');
 
 casper.options.onError = function onError(err) {
@@ -13,8 +12,7 @@ casper.test.begin('match', function begin(test) {
       this.evaluate(function () {
         document.body.style = 'background: green;';
       });
-      test.pass('good');
-      // test.assertMatchSnapshot('match');
+      test.assertMatchSnapshot('match');
     });
   casper.run(function () {
     test.done();
