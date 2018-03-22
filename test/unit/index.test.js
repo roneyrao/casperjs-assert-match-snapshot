@@ -66,7 +66,7 @@ describe('index', function () {
         selector,
         sinon.match({ quality: opts.quality })
       );
-      sinon.assert.calledWithExactly(cb, null, sinon.match({ rawMisMatchPercentage: 0 }));
+      sinon.assert.calledWithExactly(cb, null, true);
     });
 
     it('selector object', function () {
@@ -107,7 +107,7 @@ describe('index', function () {
 
       sinon.assert.calledWithExactly(
         resemblejs.compare,
-        'file:///' + filePathTemp,
+        sinon.match(new RegExp('^file:///' + filePathTemp + '\\?\\d+')),
         'file:///' + opts.folder + filename + '.' + opts.format,
         sinon.match.func
       );
@@ -133,18 +133,21 @@ describe('index', function () {
           opts.keepTemp = false;
           var err = new Error('afsaass');
           fs.remove = sinon.stub().throws(err);
-          compareCB();
-          sinon.assert.calledWithExactly(checkCB, sinon.match.instanceOf(tester.AssertionError));
-          sinon.assert.calledWithExactly(tester.AssertionError, sinon.match(new RegExp('.+snapshot.+' + err.message)));
+          var data = {};
+          this.sandbox.spy(console, 'warn');
+          compareCB(null, data);
+          sinon.assert.calledWithExactly(console.warn, sinon.match(new RegExp('.+snapshot.+' + err.message)));
+          sinon.assert.calledWithExactly(checkCB, null, data);
         });
-        it('remove error with no compare error', function () {
+        it('remove error with compare error', function () {
           opts.keepTemp = false;
           var err = new Error('afsaass');
           var errComp = new Error('kkpopopoja');
           fs.remove.throws(err);
+          this.sandbox.spy(console, 'warn');
           compareCB(errComp);
-          sinon.assert.calledWithExactly(checkCB, sinon.match.instanceOf(tester.AssertionError));
-          sinon.assert.calledWithExactly(tester.AssertionError, sinon.match(new RegExp('.+snapshot.+' + err.message + '.+compare')));
+          sinon.assert.calledWithExactly(console.warn, sinon.match(new RegExp('.+snapshot.+' + err.message)));
+          sinon.assert.calledWithExactly(tester.AssertionError, sinon.match('Fail'));
         });
         it('no remove error, has compare error', function () {
           opts.keepTemp = false;
@@ -180,12 +183,15 @@ describe('index', function () {
       var opts = {};
       var waitMatch;
       var prom = {
-        then: function (_waitMatch) { waitMatch = _waitMatch; }
+        then: function (_waitMatch) {
+          waitMatch = _waitMatch;
+          return casper;
+        }
       };
       optionsHelper.validateOptions = sinon.stub().returnsArg(0);
       casper.waitFor = sinon.stub().returns(prom);
 
-      assertMatchSnapshot(filename, selector, opts);
+      expect(assertMatchSnapshot(filename, selector, opts)).equal(casper);
 
       sinon.assert.calledWithExactly(check, filename, selector, opts, sinon.match.func);
       revert();
@@ -226,7 +232,7 @@ describe('index', function () {
 
         casper.test.assertEqual = sinon.spy();
         waitMatch();
-        sinon.assert.calledWithExactly(casper.test.assertEqual, match, true);
+        sinon.assert.calledWithExactly(casper.test.assertEqual, match, true, sinon.match(/^Snapshots matching.+/));
         delete casper.test.assertEqual;
       };
     }

@@ -2,4 +2,5 @@
 /coverage
 /test/e2e/snapshots
 /test/e2e/__snapshots__
+/test/e2e/published
 

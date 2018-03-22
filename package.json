@@ -3,14 +3,16 @@
   "version": "1.0.0",
   "description": "casperjs tester extension to assert snapshots matched",
   "scripts": {
-    "pretest": "eslint",
+    "pretest": "eslint *.js test",
     "test:unit": "nyc --reporter=lcov --reporter=text mocha test/unit",
     "temp": "mocha --watch test/unit/index.test.js",
     "test:e2e": "node test/e2e/runner.js",
     "test": "npm run test:unit && npm run test:e2e"
   },
   "files": [
-    "index.js"
+    "index.js",
+    "options-helper.js",
+    "option-error.js"
   ],
   "keywords": [
     "casper",
@@ -37,6 +39,7 @@
     "eslint-plugin-import": "^2.9.0",
     "mocha": "^5.0.4",
     "mock-require": "^3.0.1",
+    "npm-install-package": "^2.1.0",
     "nyc": "^11.6.0",
     "resemblejs": "^2.10.0",
     "rewire": "^3.0.2",

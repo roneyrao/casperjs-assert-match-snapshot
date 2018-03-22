@@ -1,5 +1,5 @@
 var fs = require('fs');
-var init = require('../');
+var init = require('../../');
 
 var dir = '/snapshots/';
 var format = 'jpg';
@@ -20,21 +20,20 @@ casper.options.onError = function onError(err) {
 casper.options.viewportSize = { width: 50, height: 50 };
 
 var filename = 'setDefaultOptions';
+function initDom() {
+  document.documentElement.style.background = 'green';
+}
 
 casper.test.begin('set default options, create new one', function begin(test) {
   casper.cli.options.updateSnapshot = true;
 
   casper.start()
+    .thenEvaluate(initDom)
     .then(function () {
-      this.evaluate(function () {
-        document.documentElement.style.background = 'green';
-      });
-
       test.assertMatchSnapshot(filename);
     })
     .then(function () {
-      test.assert(fs.exists(dir + filename + '.' + format));
-      test.assert(fs.exists(dir + 'temp_' + filename + '.' + format));
+      test.assert(fs.exists(dir + filename + '.' + format), 'New snapshot created');
     });
   casper.run(function () {
     test.done();
@@ -42,15 +41,14 @@ casper.test.begin('set default options, create new one', function begin(test) {
 });
 
 casper.test.begin('set default options, pass compare', function begin(test) {
+  casper.options.viewportSize = { width: 25, height: 50 };
   casper.cli.options.updateSnapshot = false;
 
   casper.start()
+    .thenEvaluate(initDom)
     .then(function () {
-      this.evaluate(function () {
-        document.documentElement.style.background = 'green';
-      });
-
       test.assertMatchSnapshot(filename);
+      test.assert(fs.exists(dir + 'temp_' + filename + '.' + format), 'Temporary snapshot is not removed');
     });
   casper.run(function () {
     test.done();
@@ -58,16 +56,21 @@ casper.test.begin('set default options, pass compare', function begin(test) {
 });
 
 casper.test.begin('set default options, fail compare', function begin(test) {
-  casper.options.viewportSize = { width: 50, height: 24 };
+  casper.options.viewportSize = { width: 24, height: 50 };
   casper.cli.options.updateSnapshot = false;
 
-  casper.start()
-    .then(function () {
-      this.evaluate(function () {
-        document.documentElement.style.background = 'green';
-      });
+  var assertEqual = test.assertEqual;
+  test.assertEqual = function (val1, val2) {
+    if (val1 === val2) test.fail('Should not satisfy maxDiff');
+  };
 
-      // test.assertNotMatchSnapshot(filename);
+  casper.start()
+    .thenEvaluate(initDom)
+    .then(function () {
+      test.assertMatchSnapshot(filename);
+    })
+    .then(function () {
+      test.assertEqual = assertEqual;
     });
   casper.run(function () {
     fs.removeTree(dir);

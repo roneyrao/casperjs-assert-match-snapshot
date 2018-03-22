@@ -3,7 +3,8 @@
     "phantomjs":true,
   }
   ,"globals":{
-    "casper":true
+    "casper":true,
+    "__utils__":true
   }
   ,"rules":{
     "no-plusplus": 0,

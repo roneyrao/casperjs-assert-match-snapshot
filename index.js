@@ -2,6 +2,7 @@
 
 var fs = require('fs');
 var tester = global.require('tester');
+// eslint-disable-next-line import/no-extraneous-dependencies
 var resemble = require('resemblejs');
 var optionsHelper = require('./options-helper');
 var MatchSnapshotOptionsError = require('./option-error.js').MatchSnapshotOptionsError;
@@ -25,19 +26,19 @@ function check(filename, selector, options, cb) {
   if (casper.cli.options.updateSnapshot) {
     // only specify format at the file name.
     capture(filePathNormal, selector, { quality: options.quality });
-    cb(null, { rawMisMatchPercentage: 0 });
+    cb(null, true);
   } else {
     var filePathTemp = options.folder + 'temp_' + filename;
 
     capture(filePathTemp, selector, { quality: options.quality });
 
-    resemble.compare('file:///' + filePathTemp, 'file:///' + filePathNormal, function compareCB(err, data) {
+    resemble.compare('file:///' + filePathTemp + '?' + (new Date().valueOf()), 'file:///' + filePathNormal, function compareCB(err, data) {
       try {
         if (!options.keepTemp) {
           fs.remove(filePathTemp);
         }
       } catch (err2) {
-        console.warn('warning: Fail to remove temporary snapshot, ' + err2.message);
+        console.warn('Warning: Fail to remove temporary snapshot, ' + err2.message);
       }
       if (err) { // this error has no information.
         cb(new tester.AssertionError('Fail to compare snapshot'));
@@ -57,8 +58,11 @@ casper.test.assertMatchSnapshot = function matchSnapshot(filename, selector, opt
     if (err) {
       console.log('Compare error occured');
       error = err;
+    } else if (data === true) {
+      console.log('Snapshot updated');
+      match = true;
     } else {
-      console.log('Expect mismatch percentage: ', data.rawMisMatchPercentage, ' <= ', options.maxDiff);
+      console.log('Expect snapshots mismatch percentage: ', data.rawMisMatchPercentage, ' <= ', options.maxDiff);
       match = data.rawMisMatchPercentage <= options.maxDiff;
     }
   }
@@ -68,12 +72,11 @@ casper.test.assertMatchSnapshot = function matchSnapshot(filename, selector, opt
     return match !== undefined || error !== undefined;
   }
 
-  casper.waitFor(wait).then(function waitMatch() {
+  return casper.waitFor(wait).then(function waitMatch() {
     if (error) {
       casper.test.fail(error);
     } else {
-      console.log('match', match, true);
-      casper.test.assertEqual(match, true);
+      casper.test.assertEqual(match, true, 'Snapshots matching satifying allowed max difference');
     }
   });
 };
