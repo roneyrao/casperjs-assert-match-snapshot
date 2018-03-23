@@ -42,7 +42,7 @@ In casper test suite:
 When run this first time, or when page is modified, to update snapshots, set this command option:
 
 ```
-  casperjs test casper.suites.js --updateSnapshot"
+  casperjs test casper.suites.js --updateSnapshot
 ```
 
 ### Set default options
@@ -66,23 +66,23 @@ To apply specific options for a certain call, instead of the global settings:
 
 - folder: **string**, '__snapshots__'
 
-Directory where snapshots being placed, relative to current working directory.
+  Directory where snapshots being placed, relative to current working directory.
 
 - format: **string**, 'png' (allowed formats based on your engine.)
 
-The snapshot file format
+  The snapshot file format
 
 - keepTemp: **boolean**, `false`
 
-Whether to leave temporary snapshot files which are tested against the original one in file system. Removed by default. These files have a prefix of `temp_` in file name.
+  Whether to leave temporary snapshot files which are tested against the original one in file system. Removed by default. These files have a prefix of `temp_` in file name.
 
 - maxDiff: **number**, 0 (0 - 100)
 
-How much the maximum difference being be tolerant of is allowed. None by default, e.g. they should be totally identical.
+  How much the maximum difference being be tolerant of is allowed. None by default, e.g. they should be totally identical.
 
 - quality: **number**, 75 (0 - 100)
 
-The quality of snapshot image for certain formats.
+  The quality of snapshot image for certain formats.
 
 
 ## API
@@ -95,11 +95,11 @@ The quality of snapshot image for certain formats.
 
 - filename: **string**, required
 
-The filename of this snapshot file, excluding extension.
+  The filename of this snapshot file, excluding extension.
 
 - selector: **string** or **Object**, optional
 
-Specify the area of this snapshot. When undefined, implies the whole page. If string, it should a valid selector. Or a json object defining the bounds (`{ left, top, width, height }`). Refer to this [doc](http://docs.casperjs.org/en/latest/modules/casper.html#capture).
+  Specify the area of this snapshot. When undefined, implies the whole page. If string, it should be a valid selector. Or a json object defining the bounds (`{ left, top, width, height }`). Refer to this [doc](http://docs.casperjs.org/en/latest/modules/casper.html#capture).
 
 - options: see above
 
