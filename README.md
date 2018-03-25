@@ -5,7 +5,7 @@
 [![codecov](https://codecov.io/gh/roneyrao/casperjs-assert-match-snapshot/branch/master/graph/badge.svg)](https://codecov.io/gh/roneyrao/casperjs-assert-match-snapshot)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/roneyrao/casperjs-assert-match-snapshot/master/LICENSE)
 
-Extension to [CasperJS]() tester, which is a fantastic utility for 'Navigation scripting & testing for [PhantomJS](http://phantomjs.org/) and [SlimerJS](https://slimerjs.org)'. It indeed supplies APIs to capture snapshots based on those engines, such as `capture`, `captureSelector` and `captureBase64` in the latest version v1.1.4 as of now. However none of those fit for the purpose of testing whether two snapshots match. Without this function we can not take its adantages into full speed especially in automating test. Wish this extension can fill the gap in a short term.
+Extension to [CasperJS]() tester, with more lightweight, test-friendlier API than unmaintained [PhantomCSS](https://www.npmjs.com/package/phantomcss), to assert snapshots matched.
 
 ## Install
 
@@ -111,7 +111,6 @@ To apply specific options for a certain call, instead of the global settings:
 ## Caveat
 
 - It calls `waitFor` internally, so if the next steps depends on that test, please execute in `then`.
-- Currently this is full tested, however only based on PhantomJS v2.1.1. With no guarantee it works in other engine like SlimerJS.
 
 
 ## License

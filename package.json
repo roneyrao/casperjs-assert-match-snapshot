@@ -1,6 +1,6 @@
 {
   "name": "casperjs-assert-match-snapshot",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "casperjs tester extension to assert snapshots matched",
   "scripts": {
     "pretest": "eslint *.js test",
